@@ -28,6 +28,7 @@ function UploadModal({
   const addBatch = useAddPhotoBatch()
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
+  const [captions, setCaptions] = useState<string[]>([])
   const [selectedAlbum, setSelectedAlbum] = useState(albumId ?? '')
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -36,23 +37,29 @@ function UploadModal({
     if (!picked.length) return
     setFiles(picked)
     setPreviews(picked.map((f) => URL.createObjectURL(f)))
+    setCaptions(picked.map(() => ''))
   }
 
   function removePreview(i: number) {
     setFiles((p) => p.filter((_, idx) => idx !== i))
     setPreviews((p) => p.filter((_, idx) => idx !== i))
+    setCaptions((p) => p.filter((_, idx) => idx !== i))
+  }
+
+  function updateCaption(i: number, val: string) {
+    setCaptions((p) => p.map((c, idx) => idx === i ? val : c))
   }
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
     if (!files.length) return
-    await addBatch.mutateAsync({ files, catId, albumId: selectedAlbum || undefined })
-    setFiles([]); setPreviews([]); setSelectedAlbum(albumId ?? '')
+    await addBatch.mutateAsync({ files, catId, albumId: selectedAlbum || undefined, captions })
+    setFiles([]); setPreviews([]); setCaptions([]); setSelectedAlbum(albumId ?? '')
     onClose()
   }
 
   function handleClose() {
-    setFiles([]); setPreviews([]); setSelectedAlbum(albumId ?? '')
+    setFiles([]); setPreviews([]); setCaptions([]); setSelectedAlbum(albumId ?? '')
     onClose()
   }
 
@@ -91,17 +98,26 @@ function UploadModal({
         </div>
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
 
-        {/* Preview grid */}
+        {/* Preview grid with per-photo captions */}
         {previews.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-2">
             {previews.map((src, i) => (
-              <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
-                <img src={src} alt="" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removePreview(i)}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 text-white text-xs flex items-center justify-center"
-                >✕</button>
+              <div key={i} className="flex gap-2 items-center">
+                <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removePreview(i)}
+                    className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/50 text-white text-[10px] flex items-center justify-center"
+                  >✕</button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="備注（選填）"
+                  value={captions[i] ?? ''}
+                  onChange={(e) => updateCaption(i, e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-2xl border border-[#F4A9C0]/30 bg-white text-sm text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] placeholder:text-[#4A4A4A]/30"
+                />
               </div>
             ))}
           </div>

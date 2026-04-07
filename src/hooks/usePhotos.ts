@@ -75,15 +75,21 @@ export function usePhotos(catId?: string, albumId?: string | null) {
 export function useAddPhotoBatch() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async ({ files, catId, albumId }: { files: File[]; catId: string; albumId?: string }) => {
+    mutationFn: async ({ files, catId, albumId, captions }: { files: File[]; catId: string; albumId?: string; captions?: string[] }) => {
       const results = await Promise.all(
-        files.map(async (file) => {
+        files.map(async (file, i) => {
           const ext = file.name.split('.').pop()
           const path = `${catId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
           const { error: uploadError } = await supabase.storage.from('cat-media').upload(path, file)
           if (uploadError) throw uploadError
           const { data: { publicUrl } } = supabase.storage.from('cat-media').getPublicUrl(path)
-          return { cat_id: catId, album_id: albumId ?? null, url: publicUrl, taken_at: new Date().toISOString() }
+          return {
+            cat_id: catId,
+            album_id: albumId ?? null,
+            url: publicUrl,
+            caption: captions?.[i] || null,
+            taken_at: new Date().toISOString(),
+          }
         })
       )
       const { data, error } = await supabase.from('photo').insert(results).select()
