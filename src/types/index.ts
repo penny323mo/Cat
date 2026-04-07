@@ -85,9 +85,18 @@ export interface Milestone {
   created_at: string
 }
 
+export interface PhotoAlbum {
+  id: string
+  cat_id: string
+  name: string
+  cover_url?: string
+  created_at: string
+}
+
 export interface Photo {
   id: string
   cat_id: string
+  album_id?: string
   url: string
   caption?: string
   taken_at: string
