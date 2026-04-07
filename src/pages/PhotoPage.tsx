@@ -1,40 +1,42 @@
 import { useState, useRef } from 'react'
 import { format } from 'date-fns'
 import { useCatStore } from '../stores/catStore'
-import { usePhotos, useAddPhoto, useDeletePhoto } from '../hooks/usePhotos'
+import { usePhotos, useAddPhotoBatch, useDeletePhoto } from '../hooks/usePhotos'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
-import { Input } from '../components/ui/Input'
 
 export function PhotoPage() {
   const { activeCatId } = useCatStore()
   const { data: photos, isLoading } = usePhotos(activeCatId ?? undefined)
-  const addPhoto = useAddPhoto()
+  const addPhotoBatch = useAddPhotoBatch()
   const deletePhoto = useDeletePhoto()
   const [showModal, setShowModal] = useState(false)
-  const [caption, setCaption] = useState('')
-  const [preview, setPreview] = useState<string | null>(null)
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]
-    if (!f) return
-    setFile(f)
-    setPreview(URL.createObjectURL(f))
+  function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? [])
+    if (!picked.length) return
+    setFiles(picked)
+    setPreviews(picked.map((f) => URL.createObjectURL(f)))
+  }
+
+  function removePreview(i: number) {
+    setFiles((prev) => prev.filter((_, idx) => idx !== i))
+    setPreviews((prev) => prev.filter((_, idx) => idx !== i))
   }
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
-    if (!activeCatId || !file) return
-    await addPhoto.mutateAsync({ file, catId: activeCatId, caption: caption || undefined })
+    if (!activeCatId || !files.length) return
+    await addPhotoBatch.mutateAsync({ files, catId: activeCatId })
     setShowModal(false)
-    setFile(null)
-    setPreview(null)
-    setCaption('')
+    setFiles([])
+    setPreviews([])
   }
 
   const selectedPhoto = (photos ?? []).find((p) => p.id === selected)
@@ -73,25 +75,54 @@ export function PhotoPage() {
         </div>
       </div>
 
-      {/* Upload modal */}
-      <Modal open={showModal} onClose={() => setShowModal(false)} title="上傳相片">
+      {/* Upload modal — supports multi-select */}
+      <Modal open={showModal} onClose={() => { setShowModal(false); setFiles([]); setPreviews([]) }} title="上傳相片">
         <form onSubmit={handleUpload} className="space-y-3">
+          {/* Drop zone */}
           <div
-            className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-6 text-center cursor-pointer hover:bg-[#FDDDE6]/30"
+            className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-5 text-center cursor-pointer hover:bg-[#FDDDE6]/30 transition-colors"
             onClick={() => fileRef.current?.click()}
           >
-            {preview ? (
-              <img src={preview} alt="preview" className="max-h-48 mx-auto rounded-xl object-cover" />
-            ) : (
+            {previews.length === 0 ? (
               <>
                 <p className="text-3xl mb-1">📷</p>
                 <p className="text-sm text-[#4A4A4A]/50">點擊選擇相片</p>
+                <p className="text-xs text-[#4A4A4A]/30 mt-1">可一次選取多張</p>
               </>
+            ) : (
+              <p className="text-sm text-[#F4A9C0] font-medium">已選 {files.length} 張 · 點擊重新選擇</p>
             )}
           </div>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          <Input label="描述（選填）" placeholder="記錄這一刻..." value={caption} onChange={(e) => setCaption(e.target.value)} />
-          <Button type="submit" fullWidth loading={addPhoto.isPending} disabled={!file}>上傳</Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleFiles}
+          />
+
+          {/* Preview grid */}
+          {previews.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {previews.map((src, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removePreview(i)}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 text-white text-xs flex items-center justify-center"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Button type="submit" fullWidth loading={addPhotoBatch.isPending} disabled={!files.length}>
+            {addPhotoBatch.isPending ? `上傳中...` : `上傳 ${files.length ? `${files.length} 張` : ''}`}
+          </Button>
         </form>
       </Modal>
 

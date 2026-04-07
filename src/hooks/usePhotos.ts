@@ -46,6 +46,28 @@ export function useAddPhoto() {
   })
 }
 
+export function useAddPhotoBatch() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ files, catId }: { files: File[]; catId: string }) => {
+      const results = await Promise.all(
+        files.map(async (file) => {
+          const ext = file.name.split('.').pop()
+          const path = `${catId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+          const { error: uploadError } = await supabase.storage.from('cat-media').upload(path, file)
+          if (uploadError) throw uploadError
+          const { data: { publicUrl } } = supabase.storage.from('cat-media').getPublicUrl(path)
+          return { cat_id: catId, url: publicUrl, taken_at: new Date().toISOString() }
+        })
+      )
+      const { data, error } = await supabase.from('photo').insert(results).select()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_data, { catId }) => qc.invalidateQueries({ queryKey: ['photos', catId] }),
+  })
+}
+
 export function useDeletePhoto() {
   const qc = useQueryClient()
   return useMutation({

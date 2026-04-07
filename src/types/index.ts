@@ -45,6 +45,7 @@ export interface VetRecord {
   cost?: number
   next_visit_date?: string
   notes?: string
+  report_url?: string
   created_at: string
 }
 

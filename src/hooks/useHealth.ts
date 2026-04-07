@@ -21,10 +21,19 @@ export function useVetRecords(catId?: string) {
 export function useAddVetRecord() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (values: Omit<VetRecord, 'id' | 'created_at'>) => {
+    mutationFn: async ({ file, ...values }: Omit<VetRecord, 'id' | 'created_at'> & { file?: File }) => {
+      let report_url: string | undefined
+      if (file) {
+        const ext = file.name.split('.').pop()
+        const path = `reports/${values.cat_id}/${Date.now()}.${ext}`
+        const { error: uploadError } = await supabase.storage.from('cat-media').upload(path, file)
+        if (uploadError) throw uploadError
+        const { data: { publicUrl } } = supabase.storage.from('cat-media').getPublicUrl(path)
+        report_url = publicUrl
+      }
       const { data, error } = await supabase
         .from('vet_record')
-        .insert(values)
+        .insert({ ...values, report_url })
         .select()
         .single()
       if (error) throw error

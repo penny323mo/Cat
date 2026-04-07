@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { format, differenceInDays } from 'date-fns'
 import { useCatStore } from '../stores/catStore'
 import { useVetRecords, useAddVetRecord, useReminders, useAddReminder, useToggleReminder } from '../hooks/useHealth'
@@ -24,6 +24,8 @@ export function HealthPage() {
   const [showVetModal, setShowVetModal] = useState(false)
   const [showReminderModal, setShowReminderModal] = useState(false)
   const [vetForm, setVetForm] = useState({ visit_date: format(new Date(), 'yyyy-MM-dd'), vet_name: '', reason: '', diagnosis: '', treatment: '', cost: '', next_visit_date: '', notes: '' })
+  const [reportFile, setReportFile] = useState<File | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const [reminderForm, setReminderForm] = useState({ type: 'vaccine', title: '', due_date: format(new Date(), 'yyyy-MM-dd'), recurrence_days: '', notes: '' })
 
   async function handleVetSubmit(e: React.FormEvent) {
@@ -39,9 +41,11 @@ export function HealthPage() {
       cost: vetForm.cost ? parseFloat(vetForm.cost) : undefined,
       next_visit_date: vetForm.next_visit_date || undefined,
       notes: vetForm.notes || undefined,
+      file: reportFile ?? undefined,
     })
     setShowVetModal(false)
     setVetForm({ visit_date: format(new Date(), 'yyyy-MM-dd'), vet_name: '', reason: '', diagnosis: '', treatment: '', cost: '', next_visit_date: '', notes: '' })
+    setReportFile(null)
   }
 
   async function handleReminderSubmit(e: React.FormEvent) {
@@ -160,6 +164,16 @@ export function HealthPage() {
                 {rec.next_visit_date && (
                   <p className="text-xs text-[#F4A9C0] mt-2">下次覆診：{format(new Date(rec.next_visit_date), 'yyyy/MM/dd')}</p>
                 )}
+                {rec.report_url && (
+                  <a
+                    href={rec.report_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-[#7EC8C8] hover:underline"
+                  >
+                    📄 查看體檢報告 PDF
+                  </a>
+                )}
               </Card>
             ))}
           </>
@@ -177,6 +191,21 @@ export function HealthPage() {
           <Input label="費用 HKD（選填）" type="number" value={vetForm.cost} onChange={(e) => setVetForm((f) => ({ ...f, cost: e.target.value }))} />
           <Input label="下次覆診日期（選填）" type="date" value={vetForm.next_visit_date} onChange={(e) => setVetForm((f) => ({ ...f, next_visit_date: e.target.value }))} />
           <Textarea label="備註（選填）" rows={2} value={vetForm.notes} onChange={(e) => setVetForm((f) => ({ ...f, notes: e.target.value }))} />
+          {/* PDF upload */}
+          <div>
+            <p className="text-sm font-medium text-[#4A4A4A] mb-1">體檢報告 PDF（選填）</p>
+            <div
+              className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-4 text-center cursor-pointer hover:bg-[#FDDDE6]/30 transition-colors"
+              onClick={() => fileRef.current?.click()}
+            >
+              {reportFile ? (
+                <p className="text-sm text-[#4A4A4A]">📄 {reportFile.name}</p>
+              ) : (
+                <p className="text-sm text-[#4A4A4A]/40">點擊上傳 PDF</p>
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={(e) => setReportFile(e.target.files?.[0] ?? null)} />
+          </div>
           <Button type="submit" fullWidth loading={addVet.isPending}>儲存</Button>
         </form>
       </Modal>
