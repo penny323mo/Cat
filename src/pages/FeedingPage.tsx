@@ -110,7 +110,22 @@ export function FeedingPage() {
             <option value="treat">🍪 零食</option>
             <option value="other">🍽️ 其他</option>
           </Select>
-          <Input label="品牌（選填）" placeholder="e.g. Royal Canin" value={form.food_brand} onChange={(e) => setForm((f) => ({ ...f, food_brand: e.target.value }))} />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-[#4A4A4A]">品牌（選填）</label>
+            <input
+              list="brand-options"
+              placeholder="選擇或輸入品牌"
+              value={form.food_brand}
+              onChange={(e) => setForm((f) => ({ ...f, food_brand: e.target.value }))}
+              className="w-full px-4 py-2.5 rounded-2xl border border-[#F4A9C0]/30 bg-white text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] focus:border-transparent placeholder:text-[#4A4A4A]/40"
+            />
+            <datalist id="brand-options">
+              <option value="Royal Canin" />
+              <option value="Acana" />
+              <option value="Orijen" />
+              <option value="Animonda" />
+            </datalist>
+          </div>
           <Input label="份量（克，選填）" type="number" placeholder="e.g. 50" value={form.amount_g} onChange={(e) => setForm((f) => ({ ...f, amount_g: e.target.value }))} />
           <Input label="時間（選填）" type="datetime-local" value={form.fed_at} onChange={(e) => setForm((f) => ({ ...f, fed_at: e.target.value }))} />
           <Textarea label="備註（選填）" rows={2} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
