@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { format } from 'date-fns'
 import { useCatStore } from '../stores/catStore'
-import { useAlbums, useCreateAlbum, useDeleteAlbum, usePhotos, useAddPhotoBatch, useDeletePhoto } from '../hooks/usePhotos'
+import { useAlbums, useCreateAlbum, useDeleteAlbum, usePhotos, useAddPhotoBatch, useDeletePhoto, useUpdatePhoto } from '../hooks/usePhotos'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
 import { Card } from '../components/ui/Card'
@@ -146,6 +146,7 @@ function AlbumView({
 }) {
   const { data: photos } = usePhotos(catId, album.id)
   const deletePhoto = useDeletePhoto()
+  const updatePhoto = useUpdatePhoto()
   const deleteAlbum = useDeleteAlbum()
   const [showUpload, setShowUpload] = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
@@ -199,9 +200,19 @@ function AlbumView({
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setSelected(null)}>
           <div className="max-w-sm w-full px-4" onClick={(e) => e.stopPropagation()}>
             <img src={selectedPhoto.url} alt="" className="w-full rounded-2xl object-contain max-h-[70vh]" />
-            {selectedPhoto.caption && (
-              <p className="text-white text-center text-sm mt-3">{selectedPhoto.caption}</p>
-            )}
+            <div
+              className="mt-3 text-center cursor-pointer p-2 rounded-lg hover:bg-white/10 transition-colors"
+              onClick={() => {
+                const newCap = window.prompt('設定備註：', selectedPhoto.caption || '')
+                if (newCap !== null) updatePhoto.mutate({ id: selectedPhoto.id, catId, caption: newCap })
+              }}
+            >
+              {selectedPhoto.caption ? (
+                <p className="text-white text-sm">{selectedPhoto.caption} <span className="opacity-50 text-xs ml-1">✏️</span></p>
+              ) : (
+                <p className="text-white/40 text-sm">＋ 加入備註</p>
+              )}
+            </div>
             <p className="text-white/50 text-center text-xs mt-2">{format(new Date(selectedPhoto.taken_at), 'yyyy年MM月dd日 HH:mm')}</p>
             <div className="flex gap-2 mt-4">
               <Button variant="ghost" fullWidth onClick={() => setSelected(null)} className="text-white border border-white/20">關閉</Button>
@@ -223,6 +234,7 @@ export function PhotoPage() {
   const { data: unorganised } = usePhotos(activeCatId ?? undefined, null)      // no album_id
   const createAlbum = useCreateAlbum()
   const deletePhoto = useDeletePhoto()
+  const updatePhoto = useUpdatePhoto()
 
   const [openAlbum, setOpenAlbum] = useState<PhotoAlbum | null>(null)
   const [showUpload, setShowUpload] = useState(false)
@@ -354,9 +366,19 @@ export function PhotoPage() {
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setSelected(null)}>
           <div className="max-w-sm w-full px-4" onClick={(e) => e.stopPropagation()}>
             <img src={selectedPhoto.url} alt="" className="w-full rounded-2xl object-contain max-h-[70vh]" />
-            {selectedPhoto.caption && (
-              <p className="text-white text-center text-sm mt-3">{selectedPhoto.caption}</p>
-            )}
+            <div
+              className="mt-3 text-center cursor-pointer p-2 rounded-lg hover:bg-white/10 transition-colors"
+              onClick={() => {
+                const newCap = window.prompt('設定備註：', selectedPhoto.caption || '')
+                if (newCap !== null) updatePhoto.mutate({ id: selectedPhoto.id, catId: selectedPhoto.cat_id, caption: newCap })
+              }}
+            >
+              {selectedPhoto.caption ? (
+                <p className="text-white text-sm">{selectedPhoto.caption} <span className="opacity-50 text-xs ml-1">✏️</span></p>
+              ) : (
+                <p className="text-white/40 text-sm">＋ 加入備註</p>
+              )}
+            </div>
             <p className="text-white/50 text-center text-xs mt-2">{format(new Date(selectedPhoto.taken_at), 'yyyy年MM月dd日 HH:mm')}</p>
             <div className="flex gap-2 mt-4">
               <Button variant="ghost" fullWidth onClick={() => setSelected(null)} className="text-white border border-white/20">關閉</Button>

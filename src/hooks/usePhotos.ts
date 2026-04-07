@@ -122,3 +122,15 @@ export function useDeletePhoto() {
     onSuccess: (catId) => qc.invalidateQueries({ queryKey: ['photos', catId] }),
   })
 }
+
+export function useUpdatePhoto() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, catId, caption }: { id: string; catId: string; caption: string }) => {
+      const { error } = await supabase.from('photo').update({ caption }).eq('id', id)
+      if (error) throw error
+      return catId
+    },
+    onSuccess: (catId) => qc.invalidateQueries({ queryKey: ['photos', catId] }),
+  })
+}
