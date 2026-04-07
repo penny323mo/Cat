@@ -199,6 +199,9 @@ function AlbumView({
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setSelected(null)}>
           <div className="max-w-sm w-full px-4" onClick={(e) => e.stopPropagation()}>
             <img src={selectedPhoto.url} alt="" className="w-full rounded-2xl object-contain max-h-[70vh]" />
+            {selectedPhoto.caption && (
+              <p className="text-white text-center text-sm mt-3">{selectedPhoto.caption}</p>
+            )}
             <p className="text-white/50 text-center text-xs mt-2">{format(new Date(selectedPhoto.taken_at), 'yyyy年MM月dd日 HH:mm')}</p>
             <div className="flex gap-2 mt-4">
               <Button variant="ghost" fullWidth onClick={() => setSelected(null)} className="text-white border border-white/20">關閉</Button>
@@ -351,6 +354,9 @@ export function PhotoPage() {
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setSelected(null)}>
           <div className="max-w-sm w-full px-4" onClick={(e) => e.stopPropagation()}>
             <img src={selectedPhoto.url} alt="" className="w-full rounded-2xl object-contain max-h-[70vh]" />
+            {selectedPhoto.caption && (
+              <p className="text-white text-center text-sm mt-3">{selectedPhoto.caption}</p>
+            )}
             <p className="text-white/50 text-center text-xs mt-2">{format(new Date(selectedPhoto.taken_at), 'yyyy年MM月dd日 HH:mm')}</p>
             <div className="flex gap-2 mt-4">
               <Button variant="ghost" fullWidth onClick={() => setSelected(null)} className="text-white border border-white/20">關閉</Button>
