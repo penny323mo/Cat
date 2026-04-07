@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts'
 import { useCatStore } from '../stores/catStore'
+import { useCats } from '../hooks/useCats'
 import { useWeightLogs, useAddWeight } from '../hooks/useWeight'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
@@ -11,7 +12,9 @@ import { Modal } from '../components/ui/Modal'
 import { Input } from '../components/ui/Input'
 
 export function WeightPage() {
-  const { activeCatId } = useCatStore()
+  const { activeCatId, getActiveCat } = useCatStore()
+  useCats() // ensure cats are synced to store
+  const cat = getActiveCat()
   const { data: weights, isLoading } = useWeightLogs(activeCatId ?? undefined)
   const addWeight = useAddWeight()
   const [showModal, setShowModal] = useState(false)
@@ -73,11 +76,15 @@ export function WeightPage() {
                   contentStyle={{ borderRadius: '12px', border: '1px solid #F4A9C020', fontSize: 12 }}
                   formatter={(v) => [`${Number(v)} kg`, '體重']}
                 />
-                <ReferenceLine y={5} stroke="#8BC34A40" strokeDasharray="4 4" />
+                {(cat?.target_weight ?? 5) > 0 && (
+                  <ReferenceLine y={cat?.target_weight ?? 5} stroke="#8BC34A80" strokeDasharray="4 4" label={{ value: `目標 ${cat?.target_weight ?? 5}kg`, position: 'insideTopRight', fontSize: 10, fill: '#8BC34A' }} />
+                )}
                 <Line type="monotone" dataKey="weight" stroke="#F4A9C0" strokeWidth={2} dot={{ fill: '#F4A9C0', r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
-            <p className="text-xs text-[#4A4A4A]/30 mt-1 text-center">參考線：5kg（一般成貓正常範圍）</p>
+            <p className="text-xs text-[#4A4A4A]/30 mt-1 text-center">
+              {cat?.target_weight ? `目標體重：${cat.target_weight} kg` : '可在貓咪檔案設定目標體重'}
+            </p>
           </Card>
         )}
 

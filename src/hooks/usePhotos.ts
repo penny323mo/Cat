@@ -50,6 +50,48 @@ export function useDeleteAlbum() {
 
 // ── Photos ───────────────────────────────────────────────────────────────────
 
+// Recent photos for dashboard strip (latest N, random-ordered client-side)
+export function useRecentPhotos(catId?: string, limit = 20) {
+  return useQuery({
+    queryKey: ['photos-recent', catId, limit],
+    enabled: !!catId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('photo')
+        .select('id,url,caption,taken_at,cat_id')
+        .eq('cat_id', catId!)
+        .order('taken_at', { ascending: false })
+        .limit(limit)
+      if (error) throw error
+      // shuffle for a lively feel
+      const arr = [...(data as Photo[])]
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]]
+      }
+      return arr
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+// All photos (no filter) — used by milestone timeline
+export function useAllPhotos(catId?: string) {
+  return useQuery({
+    queryKey: ['photos-all', catId],
+    enabled: !!catId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('photo')
+        .select('*')
+        .eq('cat_id', catId!)
+        .order('taken_at', { ascending: true })
+      if (error) throw error
+      return data as Photo[]
+    },
+  })
+}
+
 export function usePhotos(catId?: string, albumId?: string | null) {
   return useQuery({
     queryKey: ['photos', catId, albumId],

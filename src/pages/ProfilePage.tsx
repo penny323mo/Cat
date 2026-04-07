@@ -26,6 +26,7 @@ function CatForm({ initial, onSave, loading }: {
     microchip_id: initial?.microchip_id ?? '',
     notes: initial?.notes ?? '',
     avatar_url: initial?.avatar_url ?? '',
+    target_weight: initial?.target_weight ? String(initial.target_weight) : '',
   })
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -56,6 +57,7 @@ function CatForm({ initial, onSave, loading }: {
       microchip_id: form.microchip_id || undefined,
       notes: form.notes || undefined,
       avatar_url: form.avatar_url || undefined,
+      target_weight: form.target_weight ? parseFloat(form.target_weight) : undefined,
     })
   }
 
@@ -86,6 +88,7 @@ function CatForm({ initial, onSave, loading }: {
       <Input label="生日（選填）" type="date" value={form.birthday} onChange={(e) => setForm((f) => ({ ...f, birthday: e.target.value }))} />
       <Input label="到家日期（選填）" type="date" value={form.adopted_date} onChange={(e) => setForm((f) => ({ ...f, adopted_date: e.target.value }))} />
       <Input label="晶片號碼（選填）" value={form.microchip_id} onChange={(e) => setForm((f) => ({ ...f, microchip_id: e.target.value }))} />
+      <Input label="目標體重 kg（選填）" type="number" step="0.1" placeholder="e.g. 4.5" value={form.target_weight} onChange={(e) => setForm((f) => ({ ...f, target_weight: e.target.value }))} />
       <Textarea label="備註（選填）" rows={2} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
       <Button type="submit" fullWidth loading={loading}>儲存</Button>
     </form>

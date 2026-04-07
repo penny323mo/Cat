@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { format, isToday, isYesterday, startOfMonth, eachDayOfInterval, endOfMonth } from 'date-fns'
+import { format, isToday, isYesterday, startOfMonth, eachDayOfInterval, endOfMonth, getDay } from 'date-fns'
 import { useCatStore } from '../stores/catStore'
 import { useMoodLogs, useAddMood } from '../hooks/useMood'
 import { PageLayout } from '../components/layout/PageLayout'
@@ -8,6 +8,7 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { Textarea } from '../components/ui/Input'
+import { useToast } from '../components/ui/Toast'
 import { MOOD_LABELS, MOOD_EMOJIS } from '../lib/utils'
 import type { MoodType, MoodLog } from '../types'
 
@@ -34,6 +35,7 @@ export function MoodPage() {
   const { activeCatId } = useCatStore()
   const { data: moods } = useMoodLogs(activeCatId ?? undefined)
   const addMood = useAddMood()
+  const { toast } = useToast()
   const [showModal, setShowModal] = useState(false)
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null)
   const [energy, setEnergy] = useState<1 | 2 | 3 | 4 | 5>(3)
@@ -49,6 +51,7 @@ export function MoodPage() {
       energy_level: energy,
       note: note || undefined,
     })
+    toast('心情已記錄')
     setShowModal(false)
     setSelectedMood(null)
     setEnergy(3)
@@ -77,11 +80,11 @@ export function MoodPage() {
         <Card>
           <p className="text-sm font-medium text-[#4A4A4A]/60 mb-3">{format(now, 'yyyy年MM月')} 心情月曆</p>
           <div className="grid grid-cols-7 gap-1">
-            {['日', '一', '二', '三', '四', '五', '六'].map((d) => (
+            {['一', '二', '三', '四', '五', '六', '日'].map((d) => (
               <div key={d} className="text-center text-xs text-[#4A4A4A]/30">{d}</div>
             ))}
-            {/* Offset for first day */}
-            {Array.from({ length: monthDays[0].getDay() }).map((_, i) => (
+            {/* Monday-start offset: Mon=0 … Sun=6 */}
+            {Array.from({ length: (getDay(monthDays[0]) + 6) % 7 }).map((_, i) => (
               <div key={`empty-${i}`} />
             ))}
             {monthDays.map((day) => {

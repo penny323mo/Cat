@@ -1,8 +1,10 @@
 import { useCats } from '../hooks/useCats'
-import { useFeedingLogs } from '../hooks/useFeeding'
+import { useFeedingLogs, useAddFeeding } from '../hooks/useFeeding'
+import { useToast } from '../components/ui/Toast'
 import { useWeightLogs } from '../hooks/useWeight'
 import { useReminders } from '../hooks/useHealth'
 import { useMoodLogs } from '../hooks/useMood'
+import { useRecentPhotos } from '../hooks/usePhotos'
 import { useCatStore } from '../stores/catStore'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Card } from '../components/ui/Card'
@@ -11,7 +13,6 @@ import { formatCatAge, catAgeToHuman, MOOD_EMOJIS, MOOD_LABELS, REMINDER_TYPE_LA
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns'
 import { NEW_CAT_TIPS } from '../data/tips'
 import { useNavigate } from 'react-router-dom'
-import { useAddFeeding } from '../hooks/useFeeding'
 
 function NoCat() {
   const navigate = useNavigate()
@@ -34,7 +35,9 @@ export function DashboardPage() {
   const { data: weights } = useWeightLogs(activeCatId ?? undefined)
   const { data: reminders } = useReminders(activeCatId ?? undefined)
   const { data: moods } = useMoodLogs(activeCatId ?? undefined)
+  const { data: recentPhotos } = useRecentPhotos(activeCatId ?? undefined, 20)
   const addFeeding = useAddFeeding()
+  const { toast } = useToast()
   const navigate = useNavigate()
 
   if (isLoading) {
@@ -81,6 +84,8 @@ export function DashboardPage() {
       fed_at: new Date().toISOString(),
       food_type: foodType,
     })
+    const labels = { dry: '乾糧', wet: '濕糧', treat: '零食' }
+    toast(`已記錄 ${labels[foodType]}`)
   }
 
   return (
@@ -89,19 +94,44 @@ export function DashboardPage() {
       <div className="px-4 pt-6 pb-2">
         <div className="flex items-center gap-4">
           <div
-            className="w-20 h-20 rounded-full bg-[#FDDDE6] flex items-center justify-center text-4xl overflow-hidden cursor-pointer"
+            className="w-20 h-20 rounded-full bg-[#FDDDE6] flex items-center justify-center text-4xl overflow-hidden cursor-pointer flex-shrink-0"
             onClick={() => navigate('/profile')}
           >
             {cat.avatar_url ? (
               <img src={cat.avatar_url} alt={cat.name} className="w-full h-full object-cover" />
             ) : '🐱'}
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-[#4A4A4A]">{cat.name}</h1>
             <p className="text-[#4A4A4A]/60 text-sm">{formatCatAge(cat.birthday)}</p>
             {cat.birthday && <p className="text-[#4A4A4A]/40 text-xs">{catAgeToHuman(cat.birthday)}</p>}
           </div>
         </div>
+
+        {/* Multi-cat switcher */}
+        {cats && cats.length > 1 && (
+          <div className="flex gap-2 mt-3 overflow-x-auto pb-1 -mx-1 px-1">
+            {cats.map((c) => {
+              const active = c.id === activeCatId
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => useCatStore.getState().setActiveCatId(c.id)}
+                  className={[
+                    'flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                    active ? 'bg-[#F4A9C0] text-white' : 'bg-[#FFF5E6] text-[#4A4A4A]/70 hover:bg-[#FDDDE6]',
+                  ].join(' ')}
+                >
+                  {c.avatar_url
+                    ? <img src={c.avatar_url} alt={c.name} className="w-4 h-4 rounded-full object-cover" />
+                    : <span className="text-sm">🐱</span>
+                  }
+                  {c.name}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       <div className="px-4 space-y-3 pb-4">
@@ -210,6 +240,32 @@ export function DashboardPage() {
             </button>
           ))}
         </div>
+
+        {/* Photo wall */}
+        {recentPhotos && recentPhotos.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-[#4A4A4A]/50">📸 相片回憶</p>
+              <button onClick={() => navigate('/photos')} className="text-xs text-[#F4A9C0]">查看全部 ›</button>
+            </div>
+            <div className="columns-3 gap-1.5 space-y-1.5">
+              {recentPhotos.map((photo) => (
+                <div
+                  key={photo.id}
+                  className="break-inside-avoid rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => navigate('/photos')}
+                >
+                  <img
+                    src={photo.url}
+                    alt={photo.caption ?? ''}
+                    className="w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </PageLayout>
   )

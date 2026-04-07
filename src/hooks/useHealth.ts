@@ -86,3 +86,27 @@ export function useToggleReminder() {
     onSuccess: (catId) => qc.invalidateQueries({ queryKey: ['reminders', catId] }),
   })
 }
+
+export function useDeleteReminder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, catId }: { id: string; catId: string }) => {
+      const { error } = await supabase.from('reminder').delete().eq('id', id)
+      if (error) throw error
+      return catId
+    },
+    onSuccess: (catId) => qc.invalidateQueries({ queryKey: ['reminders', catId] }),
+  })
+}
+
+export function useDeleteVetRecord() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, catId }: { id: string; catId: string }) => {
+      const { error } = await supabase.from('vet_record').delete().eq('id', id)
+      if (error) throw error
+      return catId
+    },
+    onSuccess: (catId) => qc.invalidateQueries({ queryKey: ['vet', catId] }),
+  })
+}

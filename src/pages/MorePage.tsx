@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
 import { Card } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
 import { useAuthStore } from '../stores/authStore'
 
 export function MorePage() {
@@ -12,12 +11,13 @@ export function MorePage() {
 
   const sections = [
     {
-      title: '記錄',
+      title: '追蹤記錄',
       items: [
         { icon: '⚖️', label: '體重追蹤', to: '/weight' },
         { icon: '😸', label: '心情日記', to: '/mood' },
         { icon: '🏆', label: '里程碑', to: '/milestones' },
         { icon: '💰', label: '開支記錄', to: '/expenses' },
+        { icon: '🌱', label: '成長時間線', to: '/photos/timeline' },
       ],
     },
     {
@@ -31,7 +31,7 @@ export function MorePage() {
 
   return (
     <PageLayout>
-      <Header title="更多" />
+      <Header title="我的" />
 
       <div className="px-4 py-4 space-y-4">
         {sections.map((section) => (
@@ -57,18 +57,17 @@ export function MorePage() {
         ))}
 
         {user && (
-          <div className="pt-4">
-            <p className="text-xs text-[#4A4A4A]/40 text-center mb-3">{user.email}</p>
-            <Button
-              variant="ghost"
-              fullWidth
+          <div className="pt-2">
+            <p className="text-xs text-[#4A4A4A]/40 text-center mb-3">{(user as { email?: string }).email}</p>
+            <button
+              className="w-full py-3 rounded-2xl text-sm text-[#4A4A4A]/50 hover:bg-[#FFF5E6] transition-colors"
               onClick={async () => {
                 await supabase.auth.signOut()
                 navigate('/login')
               }}
             >
               登出
-            </Button>
+            </button>
           </div>
         )}
       </div>

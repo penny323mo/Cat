@@ -10,6 +10,7 @@ export interface CatProfile {
   color?: string
   microchip_id?: string
   notes?: string
+  target_weight?: number
   created_at: string
   updated_at: string
 }

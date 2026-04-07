@@ -1,13 +1,14 @@
 import { useState, useRef } from 'react'
 import { format, differenceInDays } from 'date-fns'
 import { useCatStore } from '../stores/catStore'
-import { useVetRecords, useAddVetRecord, useReminders, useAddReminder, useToggleReminder } from '../hooks/useHealth'
+import { useVetRecords, useAddVetRecord, useDeleteVetRecord, useReminders, useAddReminder, useToggleReminder, useDeleteReminder } from '../hooks/useHealth'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { Input, Select, Textarea } from '../components/ui/Input'
+import { useToast } from '../components/ui/Toast'
 import { REMINDER_TYPE_LABELS } from '../lib/utils'
 import type { Reminder } from '../types'
 
@@ -18,8 +19,11 @@ export function HealthPage() {
   const { data: vetRecords } = useVetRecords(activeCatId ?? undefined)
   const { data: reminders } = useReminders(activeCatId ?? undefined)
   const addVet = useAddVetRecord()
+  const deleteVet = useDeleteVetRecord()
   const addReminder = useAddReminder()
   const toggleReminder = useToggleReminder()
+  const deleteReminder = useDeleteReminder()
+  const { toast } = useToast()
   const [tab, setTab] = useState<Tab>('reminders')
   const [showVetModal, setShowVetModal] = useState(false)
   const [showReminderModal, setShowReminderModal] = useState(false)
@@ -43,6 +47,7 @@ export function HealthPage() {
       notes: vetForm.notes || undefined,
       file: reportFile ?? undefined,
     })
+    toast('睇醫生記錄已儲存')
     setShowVetModal(false)
     setVetForm({ visit_date: format(new Date(), 'yyyy-MM-dd'), vet_name: '', reason: '', diagnosis: '', treatment: '', cost: '', next_visit_date: '', notes: '' })
     setReportFile(null)
@@ -60,6 +65,7 @@ export function HealthPage() {
       recurrence_days: reminderForm.recurrence_days ? parseInt(reminderForm.recurrence_days) : undefined,
       notes: reminderForm.notes || undefined,
     })
+    toast('提醒已新增')
     setShowReminderModal(false)
     setReminderForm({ type: 'vaccine', title: '', due_date: format(new Date(), 'yyyy-MM-dd'), recurrence_days: '', notes: '' })
   }
@@ -100,7 +106,8 @@ export function HealthPage() {
             {pendingReminders.length === 0 && doneReminders.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-4xl mb-2">💊</p>
-                <p className="text-[#4A4A4A]/50">未有提醒，快新增一個吧</p>
+                <p className="text-[#4A4A4A]/50 mb-3">未有提醒，快新增一個吧</p>
+                <Button size="sm" onClick={() => setShowReminderModal(true)}>+ 新增提醒</Button>
               </div>
             )}
             {pendingReminders.map((r) => {
@@ -110,7 +117,7 @@ export function HealthPage() {
                 <Card key={r.id} className={urgent ? 'border-[#E57373]/40' : ''}>
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => toggleReminder.mutate({ id: r.id, is_done: true, catId: r.cat_id })}
+                      onClick={() => { toggleReminder.mutate({ id: r.id, is_done: true, catId: r.cat_id }); toast('已標記完成') }}
                       className="w-6 h-6 rounded-full border-2 border-[#F4A9C0] flex-shrink-0 hover:bg-[#F4A9C0]/20"
                     />
                     <div className="flex-1">
@@ -120,6 +127,10 @@ export function HealthPage() {
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${urgent ? 'bg-[#E57373]/10 text-[#E57373]' : 'bg-[#FFF5E6] text-[#FFB74D]'}`}>
                       {days < 0 ? `逾期 ${Math.abs(days)} 日` : days === 0 ? '今日' : `${days} 日`}
                     </span>
+                    <button
+                      onClick={() => deleteReminder.mutate({ id: r.id, catId: r.cat_id })}
+                      className="text-[#4A4A4A]/20 hover:text-[#E57373] text-sm ml-1"
+                    >✕</button>
                   </div>
                 </Card>
               )
@@ -131,10 +142,14 @@ export function HealthPage() {
                   <Card key={r.id} className="opacity-50">
                     <div className="flex items-center gap-3">
                       <div className="w-6 h-6 rounded-full bg-[#8BC34A] flex items-center justify-center text-white text-xs flex-shrink-0">✓</div>
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-[#4A4A4A] line-through">{r.title}</p>
                         <p className="text-xs text-[#4A4A4A]/50">{format(new Date(r.due_date), 'yyyy/MM/dd')}</p>
                       </div>
+                      <button
+                        onClick={() => deleteReminder.mutate({ id: r.id, catId: r.cat_id })}
+                        className="text-[#4A4A4A]/20 hover:text-[#E57373] text-sm"
+                      >✕</button>
                     </div>
                   </Card>
                 ))}
@@ -148,14 +163,21 @@ export function HealthPage() {
             {(!vetRecords || vetRecords.length === 0) && (
               <div className="text-center py-12">
                 <p className="text-4xl mb-2">🏥</p>
-                <p className="text-[#4A4A4A]/50">未有睇醫生記錄</p>
+                <p className="text-[#4A4A4A]/50 mb-3">未有睇醫生記錄</p>
+                <Button size="sm" onClick={() => setShowVetModal(true)}>+ 新增記錄</Button>
               </div>
             )}
             {(vetRecords ?? []).map((rec) => (
               <Card key={rec.id}>
                 <div className="flex items-start justify-between mb-2">
                   <p className="font-semibold text-[#4A4A4A]">{rec.reason || '診症'}</p>
-                  <p className="text-sm text-[#4A4A4A]/40">{format(new Date(rec.visit_date), 'yyyy/MM/dd')}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-[#4A4A4A]/40">{format(new Date(rec.visit_date), 'yyyy/MM/dd')}</p>
+                    <button
+                      onClick={() => deleteVet.mutate({ id: rec.id, catId: rec.cat_id })}
+                      className="text-[#4A4A4A]/20 hover:text-[#E57373] text-sm"
+                    >✕</button>
+                  </div>
                 </div>
                 {rec.vet_name && <p className="text-sm text-[#4A4A4A]/60">📍 {rec.vet_name}</p>}
                 {rec.diagnosis && <p className="text-sm text-[#4A4A4A]/70 mt-1">診斷：{rec.diagnosis}</p>}
@@ -165,12 +187,8 @@ export function HealthPage() {
                   <p className="text-xs text-[#F4A9C0] mt-2">下次覆診：{format(new Date(rec.next_visit_date), 'yyyy/MM/dd')}</p>
                 )}
                 {rec.report_url && (
-                  <a
-                    href={rec.report_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-[#7EC8C8] hover:underline"
-                  >
+                  <a href={rec.report_url} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-[#7EC8C8] hover:underline">
                     📄 查看體檢報告 PDF
                   </a>
                 )}
@@ -191,18 +209,10 @@ export function HealthPage() {
           <Input label="費用 HKD（選填）" type="number" value={vetForm.cost} onChange={(e) => setVetForm((f) => ({ ...f, cost: e.target.value }))} />
           <Input label="下次覆診日期（選填）" type="date" value={vetForm.next_visit_date} onChange={(e) => setVetForm((f) => ({ ...f, next_visit_date: e.target.value }))} />
           <Textarea label="備註（選填）" rows={2} value={vetForm.notes} onChange={(e) => setVetForm((f) => ({ ...f, notes: e.target.value }))} />
-          {/* PDF upload */}
           <div>
             <p className="text-sm font-medium text-[#4A4A4A] mb-1">體檢報告 PDF（選填）</p>
-            <div
-              className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-4 text-center cursor-pointer hover:bg-[#FDDDE6]/30 transition-colors"
-              onClick={() => fileRef.current?.click()}
-            >
-              {reportFile ? (
-                <p className="text-sm text-[#4A4A4A]">📄 {reportFile.name}</p>
-              ) : (
-                <p className="text-sm text-[#4A4A4A]/40">點擊上傳 PDF</p>
-              )}
+            <div className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-4 text-center cursor-pointer hover:bg-[#FDDDE6]/30" onClick={() => fileRef.current?.click()}>
+              {reportFile ? <p className="text-sm text-[#4A4A4A]">📄 {reportFile.name}</p> : <p className="text-sm text-[#4A4A4A]/40">點擊上傳 PDF</p>}
             </div>
             <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={(e) => setReportFile(e.target.files?.[0] ?? null)} />
           </div>
