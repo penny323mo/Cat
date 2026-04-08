@@ -1,27 +1,98 @@
 import { useMemo } from 'react'
-import { format, parseISO, compareAsc } from 'date-fns'
+import { format, parseISO, compareAsc, startOfDay, endOfDay } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import { useCatStore } from '../stores/catStore'
 import { useMilestones } from '../hooks/useMilestones'
 import { useAllPhotos } from '../hooks/usePhotos'
 import { useCats } from '../hooks/useCats'
+import { useFeedingLogs } from '../hooks/useFeeding'
+import { useWeightLogs } from '../hooks/useWeight'
+import { useVetRecords } from '../hooks/useHealth'
+import { useMoodLogs } from '../hooks/useMood'
 import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
 import { Button } from '../components/ui/Button'
 import { formatCatAge } from '../lib/utils'
-import type { Photo } from '../types'
+import type { Photo, FeedingLog, WeightLog, VetRecord, MoodLog } from '../types'
 
-function pickPhotosInRange(photos: Photo[], from: string, to: string | null, count = 2): Photo[] {
-  const fromDate = parseISO(from)
-  const toDate = to ? parseISO(to) : new Date()
+const MOOD_EMOJI: Record<string, string> = {
+  happy: '😊', playful: '🎉', sleepy: '😴', anxious: '😰', sick: '🤒', angry: '😾',
+}
+const FOOD_LABEL: Record<string, string> = {
+  dry: '乾糧', wet: '濕糧', treat: '零食', other: '其他',
+}
+
+function pickPhotosInRange(photos: Photo[], from: Date, to: Date, count = 2): Photo[] {
   const inRange = photos.filter((p) => {
     const d = new Date(p.taken_at)
-    return d >= fromDate && d <= toDate
+    return d >= from && d <= to
   })
   if (inRange.length <= count) return inRange
-  // Pick evenly spaced
   const step = Math.floor(inRange.length / count)
   return Array.from({ length: count }, (_, i) => inRange[i * step])
+}
+
+function dateInRange(dateStr: string, from: Date, to: Date) {
+  const d = new Date(dateStr)
+  return d >= from && d <= to
+}
+
+interface ActivitySummaryProps {
+  feedings: FeedingLog[]
+  weights: WeightLog[]
+  vets: VetRecord[]
+  moods: MoodLog[]
+}
+
+function ActivitySummary({ feedings, weights, vets, moods }: ActivitySummaryProps) {
+  const chips: { icon: string; label: string }[] = []
+
+  // Feeding summary
+  if (feedings.length > 0) {
+    const counts: Record<string, number> = {}
+    feedings.forEach((f) => { counts[f.food_type] = (counts[f.food_type] ?? 0) + 1 })
+    const detail = Object.entries(counts)
+      .map(([type, n]) => `${FOOD_LABEL[type] ?? type} ${n}`)
+      .join(' / ')
+    chips.push({ icon: '🍱', label: `餵食 ${feedings.length} 次 · ${detail}` })
+  }
+
+  // Weight summary
+  if (weights.length > 0) {
+    const first = weights[0].weight_kg
+    const last = weights[weights.length - 1].weight_kg
+    chips.push({
+      icon: '⚖️',
+      label: weights.length === 1 ? `體重 ${first} kg` : `體重 ${first} → ${last} kg`,
+    })
+  }
+
+  // Vet visits
+  vets.forEach((v) => {
+    chips.push({ icon: '🏥', label: `看診：${v.reason ?? v.vet_name ?? '就診'}` })
+  })
+
+  // Mood summary
+  if (moods.length > 0) {
+    const moodStr = moods
+      .slice(0, 4)
+      .map((m) => MOOD_EMOJI[m.mood] ?? '🐱')
+      .join('')
+    chips.push({ icon: '', label: `${moodStr} 心情記錄 ${moods.length} 次` })
+  }
+
+  if (chips.length === 0) return null
+
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {chips.map((chip, i) => (
+        <span key={i} className="inline-flex items-center gap-1 bg-[#FFF5E6] text-[#4A4A4A]/70 text-[11px] px-2.5 py-1 rounded-full">
+          {chip.icon && <span>{chip.icon}</span>}
+          {chip.label}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export function GrowthTimelinePage() {
@@ -30,9 +101,12 @@ export function GrowthTimelinePage() {
   const { data: cats } = useCats()
   const { data: milestones } = useMilestones(activeCatId ?? undefined)
   const { data: allPhotos } = useAllPhotos(activeCatId ?? undefined)
+  const { data: allFeedings } = useFeedingLogs(activeCatId ?? undefined)
+  const { data: allWeights } = useWeightLogs(activeCatId ?? undefined)
+  const { data: allVets } = useVetRecords(activeCatId ?? undefined)
+  const { data: allMoods } = useMoodLogs(activeCatId ?? undefined)
   const cat = (cats ?? []).find((c) => c.id === activeCatId)
 
-  // Build timeline segments: [adoptedDate/firstMilestone … each milestone … now]
   const segments = useMemo(() => {
     if (!milestones || !allPhotos) return []
 
@@ -40,21 +114,41 @@ export function GrowthTimelinePage() {
       compareAsc(parseISO(a.date), parseISO(b.date))
     )
 
-    // Use adopted_date or earliest milestone as origin
     const origin = cat?.adopted_date ?? sorted[0]?.date
     if (!origin) return []
 
     const points = [
-      { date: origin, title: cat?.name ? `${cat.name} 到家 🏠` : '到家', isCat: true, desc: undefined as string | undefined, photo: undefined as string | undefined },
-      ...sorted.map((m) => ({ date: m.date, title: m.title, isCat: false, desc: m.description, photo: m.photo_url })),
+      {
+        date: origin,
+        title: cat?.name ? `${cat.name} 到家 🏠` : '到家',
+        isCat: true,
+        desc: undefined as string | undefined,
+        photo: undefined as string | undefined,
+      },
+      ...sorted.map((m) => ({
+        date: m.date,
+        title: m.title,
+        isCat: false,
+        desc: m.description,
+        photo: m.photo_url,
+      })),
     ]
 
     return points.map((point, i) => {
-      const nextDate = points[i + 1]?.date ?? null
-      const photos = pickPhotosInRange(allPhotos, point.date, nextDate, 2)
-      return { ...point, photos }
+      const from = startOfDay(new Date(point.date))
+      const to = i + 1 < points.length
+        ? endOfDay(new Date(points[i + 1].date))
+        : new Date()
+
+      const photos = pickPhotosInRange(allPhotos, from, to, 2)
+      const feedings = (allFeedings ?? []).filter((f) => dateInRange(f.fed_at, from, to))
+      const weights = (allWeights ?? []).filter((w) => dateInRange(w.measured_at, from, to))
+      const vets = (allVets ?? []).filter((v) => dateInRange(v.visit_date, from, to))
+      const moods = (allMoods ?? []).filter((m) => dateInRange(m.logged_at, from, to))
+
+      return { ...point, photos, feedings, weights, vets, moods }
     })
-  }, [milestones, allPhotos, cat])
+  }, [milestones, allPhotos, allFeedings, allWeights, allVets, allMoods, cat])
 
   return (
     <PageLayout>
@@ -80,8 +174,8 @@ export function GrowthTimelinePage() {
         {segments.length === 0 && (
           <div className="text-center py-16 space-y-3">
             <p className="text-5xl">🌱</p>
-            <p className="text-[#4A4A4A]/50">先記錄里程碑，再上傳相片</p>
-            <p className="text-xs text-[#4A4A4A]/30">時間線會根據你的里程碑同相片自動生成</p>
+            <p className="text-[#4A4A4A]/50">先記錄里程碑，時間線會自動生成</p>
+            <p className="text-xs text-[#4A4A4A]/30">餵食、體重、看診、心情、相片都會自動出現</p>
             <div className="flex gap-2 justify-center mt-2">
               <Button size="sm" variant="secondary" onClick={() => navigate('/milestones')}>+ 里程碑</Button>
               <Button size="sm" onClick={() => navigate('/photos')}>+ 上傳相片</Button>
@@ -91,7 +185,6 @@ export function GrowthTimelinePage() {
 
         {/* Timeline */}
         <div className="relative">
-          {/* Vertical line */}
           {segments.length > 0 && (
             <div className="absolute left-4 top-4 bottom-0 w-0.5 bg-gradient-to-b from-[#F4A9C0] to-[#7EC8C8]/30" />
           )}
@@ -109,20 +202,26 @@ export function GrowthTimelinePage() {
 
                 <div className="flex-1 pb-2">
                   {/* Milestone info */}
-                  <div className="mb-2">
-                    <p className="font-semibold text-[#4A4A4A] text-sm">{seg.title}</p>
-                    <p className="text-xs text-[#4A4A4A]/40">{format(parseISO(seg.date), 'yyyy年MM月dd日')}</p>
-                    {seg.desc && <p className="text-xs text-[#4A4A4A]/60 mt-0.5">{seg.desc}</p>}
-                  </div>
+                  <p className="font-semibold text-[#4A4A4A] text-sm">{seg.title}</p>
+                  <p className="text-xs text-[#4A4A4A]/40">{format(parseISO(seg.date), 'yyyy年MM月dd日')}</p>
+                  {seg.desc && <p className="text-xs text-[#4A4A4A]/60 mt-0.5">{seg.desc}</p>}
 
                   {/* Milestone photo */}
                   {seg.photo && (
-                    <img src={seg.photo} alt={seg.title} className="w-full rounded-2xl object-cover max-h-40 mb-2" />
+                    <img src={seg.photo} alt={seg.title} className="w-full rounded-2xl object-cover max-h-40 mt-2" />
                   )}
 
-                  {/* Auto-picked photos from this period */}
+                  {/* Activity summary from all data sources */}
+                  <ActivitySummary
+                    feedings={seg.feedings}
+                    weights={seg.weights}
+                    vets={seg.vets}
+                    moods={seg.moods}
+                  />
+
+                  {/* Auto-picked photos */}
                   {seg.photos.length > 0 && (
-                    <div className={seg.photos.length === 1 ? '' : 'grid grid-cols-2 gap-1.5'}>
+                    <div className={`mt-2 ${seg.photos.length === 1 ? '' : 'grid grid-cols-2 gap-1.5'}`}>
                       {seg.photos.map((photo) => (
                         <div key={photo.id} className="rounded-xl overflow-hidden">
                           <img src={photo.url} alt={photo.caption ?? ''} className="w-full object-cover aspect-square" loading="lazy" />
@@ -131,16 +230,6 @@ export function GrowthTimelinePage() {
                           )}
                         </div>
                       ))}
-                    </div>
-                  )}
-
-                  {/* No photos hint */}
-                  {seg.photos.length === 0 && !seg.photo && (
-                    <div
-                      className="rounded-xl border-2 border-dashed border-[#F4A9C0]/20 h-16 flex items-center justify-center cursor-pointer hover:bg-[#FDDDE6]/20 transition-colors"
-                      onClick={() => navigate('/photos')}
-                    >
-                      <p className="text-xs text-[#4A4A4A]/30">+ 上傳這時期嘅相片</p>
                     </div>
                   )}
                 </div>

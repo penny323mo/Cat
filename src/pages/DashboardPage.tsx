@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useCats } from '../hooks/useCats'
 import { useFeedingLogs, useAddFeeding } from '../hooks/useFeeding'
 import { useToast } from '../components/ui/Toast'
@@ -13,6 +14,66 @@ import { formatCatAge, catAgeToHuman, MOOD_EMOJIS, MOOD_LABELS, REMINDER_TYPE_LA
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns'
 import { NEW_CAT_TIPS } from '../data/tips'
 import { useNavigate } from 'react-router-dom'
+import type { Photo } from '../types'
+
+function PhotoSlideshow({ photos, onViewAll }: { photos: Photo[]; onViewAll: () => void }) {
+  const [index, setIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    if (photos.length <= 1) return
+    const id = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % photos.length)
+        setVisible(true)
+      }, 350)
+    }, 4000)
+    return () => clearInterval(id)
+  }, [photos.length])
+
+  const photo = photos[index]
+
+  return (
+    <div className="relative rounded-3xl overflow-hidden cursor-pointer" style={{ height: 220 }} onClick={onViewAll}>
+      <img
+        key={photo.id}
+        src={photo.url}
+        alt={photo.caption ?? ''}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.35s ease' }}
+        loading="lazy"
+      />
+      {/* Dark gradient overlay at bottom */}
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent" />
+
+      {/* Caption + view-all */}
+      <div className="absolute inset-x-0 bottom-0 px-4 pb-3 flex items-end justify-between">
+        <p className="text-white text-xs truncate max-w-[70%] drop-shadow">
+          {photo.caption || ''}
+        </p>
+        <span className="text-white/80 text-xs">查看全部 ›</span>
+      </div>
+
+      {/* Dot indicators */}
+      {photos.length > 1 && (
+        <div className="absolute top-3 right-3 flex gap-1">
+          {photos.map((_, i) => (
+            <div
+              key={i}
+              className="rounded-full transition-all duration-300"
+              style={{
+                width: i === index ? 16 : 6,
+                height: 6,
+                background: i === index ? 'white' : 'rgba(255,255,255,0.4)',
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function NoCat() {
   const navigate = useNavigate()
@@ -241,29 +302,11 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* Photo wall */}
+        {/* Photo slideshow */}
         {recentPhotos && recentPhotos.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-[#4A4A4A]/50">📸 相片回憶</p>
-              <button onClick={() => navigate('/photos')} className="text-xs text-[#F4A9C0]">查看全部 ›</button>
-            </div>
-            <div className="columns-3 gap-1.5 space-y-1.5">
-              {recentPhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="break-inside-avoid rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => navigate('/photos')}
-                >
-                  <img
-                    src={photo.url}
-                    alt={photo.caption ?? ''}
-                    className="w-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-            </div>
+            <p className="text-sm font-medium text-[#4A4A4A]/50 mb-2">📸 相片回憶</p>
+            <PhotoSlideshow photos={recentPhotos} onViewAll={() => navigate('/photos')} />
           </div>
         )}
       </div>
