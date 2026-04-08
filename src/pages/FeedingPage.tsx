@@ -91,7 +91,7 @@ export function FeedingPage() {
                   </div>
                   <button
                     onClick={() => deleteFeeding.mutate({ id: log.id, catId: log.cat_id })}
-                    className="text-[#4A4A4A]/20 hover:text-[#E57373] text-sm"
+                    className="w-8 h-8 flex items-center justify-center rounded-full text-[#4A4A4A]/30 hover:text-[#E57373] hover:bg-[#E57373]/10 active:scale-90 transition-all flex-shrink-0"
                   >
                     ✕
                   </button>
