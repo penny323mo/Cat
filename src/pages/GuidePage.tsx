@@ -74,7 +74,7 @@ export function GuidePage() {
             onClick={() => setTab(t.key)}
             className={[
               'flex-shrink-0 px-3 py-2 rounded-2xl text-sm font-medium transition-colors',
-              tab === t.key ? 'bg-[#F4A9C0] text-white' : 'bg-white text-[#4A4A4A]/60',
+              tab === t.key ? 'bg-[var(--cp)] text-white' : 'bg-white text-[#4A4A4A]/60',
             ].join(' ')}
           >
             {t.label}
@@ -86,14 +86,14 @@ export function GuidePage() {
         {tab === 'tips' && (
           <>
             {adoptedDate && (
-              <Card className="bg-[#FFF5E6] border-[#FFB74D]/30">
+              <Card className="bg-[var(--cp-xl)] border-[#FFB74D]/30">
                 <p className="text-xs text-[#FFB74D] font-medium mb-1">今日貼士 · 第 {daysOwned + 1} 日</p>
                 <p className="text-sm text-[#4A4A4A]">{NEW_CAT_TIPS[tipIndex]}</p>
               </Card>
             )}
             <p className="text-sm font-medium text-[#4A4A4A]/60">30 日新手養貓貼士</p>
             {NEW_CAT_TIPS.map((tip, i) => (
-              <Card key={i} className={i === tipIndex ? 'border-[#F4A9C0]' : ''}>
+              <Card key={i} className={i === tipIndex ? 'border-[var(--cp)]' : ''}>
                 <p className="text-xs text-[#4A4A4A]/40 mb-1">第 {i + 1} 日</p>
                 <p className="text-sm text-[#4A4A4A]">{tip}</p>
               </Card>
@@ -110,9 +110,9 @@ export function GuidePage() {
         {tab === 'checklist' && (
           <>
             <p className="text-sm text-[#4A4A4A]/60">新貓到家準備清單（{checked.size}/{CHECKLIST.length}）</p>
-            <div className="w-full bg-[#F4A9C0]/20 rounded-full h-2">
+            <div className="w-full bg-[var(--cp)]/20 rounded-full h-2">
               <div
-                className="bg-[#F4A9C0] h-2 rounded-full transition-all"
+                className="bg-[var(--cp)] h-2 rounded-full transition-all"
                 style={{ width: `${(checked.size / CHECKLIST.length) * 100}%` }}
               />
             </div>
@@ -125,11 +125,11 @@ export function GuidePage() {
                     <button
                       key={i}
                       onClick={() => toggleCheck(globalIdx)}
-                      className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white border border-[#F4A9C0]/20 mb-2 text-left hover:bg-[#FFF5E6] transition-colors"
+                      className="w-full flex items-center gap-3 p-3 rounded-2xl bg-white border border-[var(--cp)]/20 mb-2 text-left hover:bg-[var(--cp-xl)] transition-colors"
                     >
                       <div className={[
                         'w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0',
-                        checked.has(globalIdx) ? 'bg-[#8BC34A] border-[#8BC34A]' : 'border-[#F4A9C0]',
+                        checked.has(globalIdx) ? 'bg-[#8BC34A] border-[#8BC34A]' : 'border-[var(--cp)]',
                       ].join(' ')}>
                         {checked.has(globalIdx) && <span className="text-white text-xs">✓</span>}
                       </div>
@@ -151,7 +151,7 @@ export function GuidePage() {
                   onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
                 >
                   <p className="font-medium text-[#4A4A4A] pr-2">{faq.q}</p>
-                  <span className={['text-[#F4A9C0] transition-transform', expandedFaq === i ? 'rotate-180' : ''].join(' ')}>▾</span>
+                  <span className={['text-[var(--cp)] transition-transform', expandedFaq === i ? 'rotate-180' : ''].join(' ')}>▾</span>
                 </button>
                 {expandedFaq === i && (
                   <div className="px-4 pb-4">

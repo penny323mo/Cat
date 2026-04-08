@@ -13,9 +13,9 @@ import { EXPENSE_CATEGORY_LABELS, EXPENSE_CATEGORY_EMOJIS } from '../lib/utils'
 import type { ExpenseCategory } from '../types'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  food: '#F4A9C0',
+  food: 'var(--cp)',
   medical: '#E57373',
-  toy: '#7EC8C8',
+  toy: 'var(--ca)',
   grooming: '#FFB74D',
   other: '#8BC34A',
 }
@@ -80,7 +80,7 @@ export function ExpensePage() {
               onClick={() => setPeriod(p)}
               className={[
                 'flex-1 py-2 rounded-2xl text-sm font-medium transition-colors',
-                period === p ? 'bg-[#F4A9C0] text-white' : 'bg-white text-[#4A4A4A]/60',
+                period === p ? 'bg-[var(--cp)] text-white' : 'bg-white text-[#4A4A4A]/60',
               ].join(' ')}
             >
               {p === 'month' ? '本月' : '本年'}
@@ -91,7 +91,7 @@ export function ExpensePage() {
         {/* Total */}
         <Card className="text-center">
           <p className="text-xs text-[#4A4A4A]/50">{period === 'month' ? format(now, 'yyyy年MM月') : format(now, 'yyyy年')} 總開支</p>
-          <p className="text-3xl font-bold text-[#F4A9C0] mt-1">HKD {total.toFixed(0)}</p>
+          <p className="text-3xl font-bold text-[var(--cp)] mt-1">HKD {total.toFixed(0)}</p>
         </Card>
 
         {/* Pie chart */}

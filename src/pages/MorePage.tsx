@@ -4,10 +4,12 @@ import { PageLayout } from '../components/layout/PageLayout'
 import { Header } from '../components/layout/Header'
 import { Card } from '../components/ui/Card'
 import { useAuthStore } from '../stores/authStore'
+import { useThemeStore, THEMES } from '../stores/themeStore'
 
 export function MorePage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+  const { theme, setTheme } = useThemeStore()
 
   const sections = [
     {
@@ -43,8 +45,8 @@ export function MorePage() {
                   key={item.to}
                   onClick={() => navigate(item.to)}
                   className={[
-                    'w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FFF5E6] transition-colors',
-                    i < section.items.length - 1 ? 'border-b border-[#F4A9C0]/10' : '',
+                    'w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--cp-xl)] transition-colors',
+                    i < section.items.length - 1 ? 'border-b border-[var(--cp)]/10' : '',
                   ].join(' ')}
                 >
                   <span className="text-xl w-8">{item.icon}</span>
@@ -56,11 +58,35 @@ export function MorePage() {
           </div>
         ))}
 
+        {/* Theme picker */}
+        <div>
+          <p className="text-xs font-medium text-[#4A4A4A]/40 mb-2 px-1">主題色彩</p>
+          <div className="flex gap-3 px-1">
+            {Object.entries(THEMES).map(([key, t]) => (
+              <button
+                key={key}
+                onClick={() => setTheme(key)}
+                className="flex flex-col items-center gap-1.5"
+              >
+                <div
+                  className="w-10 h-10 rounded-full border-4 transition-all"
+                  style={{
+                    background: t.cp,
+                    borderColor: theme === key ? t.cp : 'transparent',
+                    boxShadow: theme === key ? `0 0 0 2px white, 0 0 0 4px ${t.cp}` : 'none',
+                  }}
+                />
+                <span className="text-[10px] text-[#4A4A4A]/60">{t.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {user && (
           <div className="pt-2">
             <p className="text-xs text-[#4A4A4A]/40 text-center mb-3">{(user as { email?: string }).email}</p>
             <button
-              className="w-full py-3 rounded-2xl text-sm text-[#4A4A4A]/50 hover:bg-[#FFF5E6] transition-colors"
+              className="w-full py-3 rounded-2xl text-sm text-[#4A4A4A]/50 hover:bg-[var(--cp-xl)] transition-colors"
               onClick={async () => {
                 await supabase.auth.signOut()
                 navigate('/login')

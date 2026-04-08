@@ -54,7 +54,7 @@ export function MilestonePage() {
                 <button
                   key={s.title}
                   onClick={() => useSuggested(s)}
-                  className="w-full text-left p-3 rounded-2xl bg-white border border-[#F4A9C0]/20 hover:bg-[#FDDDE6]/50 transition-colors"
+                  className="w-full text-left p-3 rounded-2xl bg-white border border-[var(--cp)]/20 hover:bg-[var(--cp-l)]/50 transition-colors"
                 >
                   <p className="text-sm font-medium text-[#4A4A4A]">{s.title}</p>
                   <p className="text-xs text-[#4A4A4A]/50">{s.description}</p>
@@ -68,11 +68,11 @@ export function MilestonePage() {
         {milestones && milestones.length > 0 && (
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-[#F4A9C0]/30" />
+            <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-[var(--cp)]/30" />
             <div className="space-y-4">
               {milestones.map((m) => (
                 <div key={m.id} className="flex gap-4 items-start">
-                  <div className="w-10 h-10 rounded-full bg-[#F4A9C0] flex items-center justify-center text-white text-lg flex-shrink-0 z-10">
+                  <div className="w-10 h-10 rounded-full bg-[var(--cp)] flex items-center justify-center text-white text-lg flex-shrink-0 z-10">
                     🏆
                   </div>
                   <Card className="flex-1">

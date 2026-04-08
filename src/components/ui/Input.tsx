@@ -14,9 +14,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           className={[
             'w-full px-4 py-2.5 rounded-2xl border bg-white text-[#4A4A4A]',
-            'focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--cp)] focus:border-transparent',
             'placeholder:text-[#4A4A4A]/40',
-            error ? 'border-[#E57373]' : 'border-[#F4A9C0]/30',
+            error ? 'border-[#E57373]' : 'border-[var(--cp)]/30',
             className,
           ].join(' ')}
           {...props}
@@ -42,9 +42,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           className={[
             'w-full px-4 py-2.5 rounded-2xl border bg-white text-[#4A4A4A] resize-none',
-            'focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--cp)] focus:border-transparent',
             'placeholder:text-[#4A4A4A]/40',
-            error ? 'border-[#E57373]' : 'border-[#F4A9C0]/30',
+            error ? 'border-[#E57373]' : 'border-[var(--cp)]/30',
             className,
           ].join(' ')}
           {...props}
@@ -70,8 +70,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           className={[
             'w-full px-4 py-2.5 rounded-2xl border bg-white text-[#4A4A4A]',
-            'focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] focus:border-transparent',
-            error ? 'border-[#E57373]' : 'border-[#F4A9C0]/30',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--cp)] focus:border-transparent',
+            error ? 'border-[#E57373]' : 'border-[var(--cp)]/30',
             className,
           ].join(' ')}
           {...props}

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { supabase } from './lib/supabase'
 import { useAuthStore } from './stores/authStore'
+import { useThemeStore, applyTheme } from './stores/themeStore'
 import { DashboardPage } from './pages/DashboardPage'
 import { FeedingPage } from './pages/FeedingPage'
 import { WeightPage } from './pages/WeightPage'
@@ -25,7 +26,7 @@ const queryClient = new QueryClient({
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user)
   if (user === undefined) return (
-    <div className="min-h-svh bg-[#FFFAF5] flex items-center justify-center">
+    <div className="min-h-svh bg-[var(--bg)] flex items-center justify-center">
       <div className="animate-spin text-4xl">🐾</div>
     </div>
   )
@@ -35,6 +36,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { setUser } = useAuthStore()
+  const { theme } = useThemeStore()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -45,6 +47,10 @@ export default function App() {
     })
     return () => subscription.unsubscribe()
   }, [setUser])
+
+  useEffect(() => {
+    applyTheme(theme)
+  }, [theme])
 
   return (
     <QueryClientProvider client={queryClient}>

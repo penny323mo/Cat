@@ -142,7 +142,7 @@ export function MoodPage() {
                   onClick={() => setSelectedMood(mood)}
                   className={[
                     'py-3 rounded-2xl flex flex-col items-center gap-1 transition-all border-2',
-                    selectedMood === mood ? 'border-[#F4A9C0] bg-[#FDDDE6]' : 'border-transparent bg-[#FFF5E6]',
+                    selectedMood === mood ? 'border-[var(--cp)] bg-[var(--cp-l)]' : 'border-transparent bg-[var(--cp-xl)]',
                   ].join(' ')}
                 >
                   <span className="text-2xl">{MOOD_EMOJIS[mood]}</span>
@@ -162,7 +162,7 @@ export function MoodPage() {
                   onClick={() => setEnergy(n)}
                   className={[
                     'flex-1 py-2 rounded-2xl text-sm font-medium transition-all',
-                    energy >= n ? 'bg-[#FFB74D] text-white' : 'bg-[#FFF5E6] text-[#4A4A4A]/40',
+                    energy >= n ? 'bg-[#FFB74D] text-white' : 'bg-[var(--cp-xl)] text-[#4A4A4A]/40',
                   ].join(' ')}
                 >
                   {n}

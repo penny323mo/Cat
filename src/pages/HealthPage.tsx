@@ -92,7 +92,7 @@ export function HealthPage() {
             onClick={() => setTab(t)}
             className={[
               'flex-1 py-2 rounded-2xl text-sm font-medium transition-colors',
-              tab === t ? 'bg-[#F4A9C0] text-white' : 'bg-white text-[#4A4A4A]/60',
+              tab === t ? 'bg-[var(--cp)] text-white' : 'bg-white text-[#4A4A4A]/60',
             ].join(' ')}
           >
             {t === 'reminders' ? '⏰ 提醒' : '🏥 睇醫生'}
@@ -118,13 +118,13 @@ export function HealthPage() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => { toggleReminder.mutate({ id: r.id, is_done: true, catId: r.cat_id }); toast('已標記完成') }}
-                      className="w-6 h-6 rounded-full border-2 border-[#F4A9C0] flex-shrink-0 hover:bg-[#F4A9C0]/20"
+                      className="w-6 h-6 rounded-full border-2 border-[var(--cp)] flex-shrink-0 hover:bg-[var(--cp)]/20"
                     />
                     <div className="flex-1">
                       <p className="font-medium text-[#4A4A4A]">{r.title}</p>
                       <p className="text-xs text-[#4A4A4A]/50">{REMINDER_TYPE_LABELS[r.type]} · {format(new Date(r.due_date), 'yyyy/MM/dd')}</p>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${urgent ? 'bg-[#E57373]/10 text-[#E57373]' : 'bg-[#FFF5E6] text-[#FFB74D]'}`}>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${urgent ? 'bg-[#E57373]/10 text-[#E57373]' : 'bg-[var(--cp-xl)] text-[#FFB74D]'}`}>
                       {days < 0 ? `逾期 ${Math.abs(days)} 日` : days === 0 ? '今日' : `${days} 日`}
                     </span>
                     <button
@@ -184,11 +184,11 @@ export function HealthPage() {
                 {rec.treatment && <p className="text-sm text-[#4A4A4A]/70">治療：{rec.treatment}</p>}
                 {rec.cost != null && <p className="text-sm text-[#4A4A4A]/60 mt-1">費用：HKD {rec.cost}</p>}
                 {rec.next_visit_date && (
-                  <p className="text-xs text-[#F4A9C0] mt-2">下次覆診：{format(new Date(rec.next_visit_date), 'yyyy/MM/dd')}</p>
+                  <p className="text-xs text-[var(--cp)] mt-2">下次覆診：{format(new Date(rec.next_visit_date), 'yyyy/MM/dd')}</p>
                 )}
                 {rec.report_url && (
                   <a href={rec.report_url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-[#7EC8C8] hover:underline">
+                    className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-[var(--ca)] hover:underline">
                     📄 查看體檢報告 PDF
                   </a>
                 )}
@@ -211,7 +211,7 @@ export function HealthPage() {
           <Textarea label="備註（選填）" rows={2} value={vetForm.notes} onChange={(e) => setVetForm((f) => ({ ...f, notes: e.target.value }))} />
           <div>
             <p className="text-sm font-medium text-[#4A4A4A] mb-1">體檢報告 PDF（選填）</p>
-            <div className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-4 text-center cursor-pointer hover:bg-[#FDDDE6]/30" onClick={() => fileRef.current?.click()}>
+            <div className="border-2 border-dashed border-[var(--cp)]/50 rounded-2xl p-4 text-center cursor-pointer hover:bg-[var(--cp-l)]/30" onClick={() => fileRef.current?.click()}>
               {reportFile ? <p className="text-sm text-[#4A4A4A]">📄 {reportFile.name}</p> : <p className="text-sm text-[#4A4A4A]/40">點擊上傳 PDF</p>}
             </div>
             <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={(e) => setReportFile(e.target.files?.[0] ?? null)} />

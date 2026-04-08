@@ -53,10 +53,10 @@ export function WeightPage() {
         {latest && (
           <Card className="text-center">
             <p className="text-xs text-[#4A4A4A]/50 mb-1">最新體重</p>
-            <p className="text-4xl font-bold text-[#F4A9C0]">{latest.weight_kg} <span className="text-xl font-normal text-[#4A4A4A]">kg</span></p>
+            <p className="text-4xl font-bold text-[var(--cp)]">{latest.weight_kg} <span className="text-xl font-normal text-[#4A4A4A]">kg</span></p>
             <p className="text-xs text-[#4A4A4A]/40 mt-1">{format(new Date(latest.measured_at), 'yyyy年MM月dd日')}</p>
             {diff && (
-              <p className={`text-sm mt-2 font-medium ${parseFloat(diff) > 0 ? 'text-[#E57373]' : parseFloat(diff) < 0 ? 'text-[#7EC8C8]' : 'text-[#4A4A4A]/40'}`}>
+              <p className={`text-sm mt-2 font-medium ${parseFloat(diff) > 0 ? 'text-[#E57373]' : parseFloat(diff) < 0 ? 'text-[var(--ca)]' : 'text-[#4A4A4A]/40'}`}>
                 {parseFloat(diff) > 0 ? '↑' : parseFloat(diff) < 0 ? '↓' : '→'} {Math.abs(parseFloat(diff))} kg 較上次
               </p>
             )}
@@ -79,7 +79,7 @@ export function WeightPage() {
                 {(cat?.target_weight ?? 5) > 0 && (
                   <ReferenceLine y={cat?.target_weight ?? 5} stroke="#8BC34A80" strokeDasharray="4 4" label={{ value: `目標 ${cat?.target_weight ?? 5}kg`, position: 'insideTopRight', fontSize: 10, fill: '#8BC34A' }} />
                 )}
-                <Line type="monotone" dataKey="weight" stroke="#F4A9C0" strokeWidth={2} dot={{ fill: '#F4A9C0', r: 4 }} />
+                <Line type="monotone" dataKey="weight" stroke="var(--cp)" strokeWidth={2} dot={{ fill: 'var(--cp)', r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
             <p className="text-xs text-[#4A4A4A]/30 mt-1 text-center">

@@ -66,12 +66,12 @@ function CatForm({ initial, onSave, loading }: {
       {/* Avatar */}
       <div className="flex flex-col items-center gap-2">
         <div
-          className="w-24 h-24 rounded-full bg-[#FDDDE6] flex items-center justify-center text-5xl overflow-hidden cursor-pointer"
+          className="w-24 h-24 rounded-full bg-[var(--cp-l)] flex items-center justify-center text-5xl overflow-hidden cursor-pointer"
           onClick={() => fileRef.current?.click()}
         >
           {form.avatar_url ? <img src={form.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : '🐱'}
         </div>
-        <button type="button" onClick={() => fileRef.current?.click()} className="text-xs text-[#F4A9C0]">
+        <button type="button" onClick={() => fileRef.current?.click()} className="text-xs text-[var(--cp)]">
           {uploading ? '上傳中...' : '更換大頭照'}
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
@@ -130,7 +130,7 @@ export function ProfilePage() {
                 onClick={() => setActiveCatId(c.id)}
                 className={[
                   'flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-colors',
-                  activeCatId === c.id ? 'bg-[#F4A9C0] text-white' : 'bg-white text-[#4A4A4A]/70',
+                  activeCatId === c.id ? 'bg-[var(--cp)] text-white' : 'bg-white text-[#4A4A4A]/70',
                 ].join(' ')}
               >
                 <span className="text-xl">
@@ -146,7 +146,7 @@ export function ProfilePage() {
           <>
             {/* Summary card */}
             <Card className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#FDDDE6] flex items-center justify-center text-3xl overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-[var(--cp-l)] flex items-center justify-center text-3xl overflow-hidden flex-shrink-0">
                 {cat.avatar_url ? <img src={cat.avatar_url} alt={cat.name} className="w-full h-full object-cover" /> : '🐱'}
               </div>
               <div>
@@ -180,9 +180,9 @@ export function ProfilePage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center">
           <div className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-[#F4A9C0]/20">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--cp)]/20">
               <h2 className="text-lg font-semibold text-[#4A4A4A]">新增貓咪</h2>
-              <button onClick={() => setShowCreate(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#FFF5E6]">✕</button>
+              <button onClick={() => setShowCreate(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--cp-xl)]">✕</button>
             </div>
             <div className="p-4">
               <CatForm onSave={handleCreate} loading={createCat.isPending} />

@@ -117,7 +117,7 @@ export function FeedingPage() {
               placeholder="選擇或輸入品牌"
               value={form.food_brand}
               onChange={(e) => setForm((f) => ({ ...f, food_brand: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-2xl border border-[#F4A9C0]/30 bg-white text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] focus:border-transparent placeholder:text-[#4A4A4A]/40"
+              className="w-full px-4 py-2.5 rounded-2xl border border-[var(--cp)]/30 bg-white text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[var(--cp)] focus:border-transparent placeholder:text-[#4A4A4A]/40"
             />
             <datalist id="brand-options">
               <option value="Royal Canin" />

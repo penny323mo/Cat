@@ -37,7 +37,7 @@ export function AuthPage({ mode }: AuthPageProps) {
   }
 
   return (
-    <div className="min-h-svh bg-[#FFFAF5] flex items-center justify-center p-6">
+    <div className="min-h-svh bg-[var(--bg)] flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -72,9 +72,9 @@ export function AuthPage({ mode }: AuthPageProps) {
 
         <p className="text-center text-sm text-[#4A4A4A]/50 mt-6">
           {mode === 'login' ? (
-            <>沒有帳號？<Link to="/signup" className="text-[#F4A9C0] font-medium">立即註冊</Link></>
+            <>沒有帳號？<Link to="/signup" className="text-[var(--cp)] font-medium">立即註冊</Link></>
           ) : (
-            <>已有帳號？<Link to="/login" className="text-[#F4A9C0] font-medium">登入</Link></>
+            <>已有帳號？<Link to="/login" className="text-[var(--cp)] font-medium">登入</Link></>
           )}
         </p>
       </div>

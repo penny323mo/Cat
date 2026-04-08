@@ -8,7 +8,7 @@ interface PageLayoutProps {
 
 export function PageLayout({ children, hideTabBar }: PageLayoutProps) {
   return (
-    <div className="flex flex-col min-h-svh bg-[#FFFAF5]">
+    <div className="flex flex-col min-h-svh bg-[var(--bg)]">
       <main className={['flex-1 max-w-lg mx-auto w-full', hideTabBar ? '' : 'pb-20'].join(' ')}>
         {children}
       </main>

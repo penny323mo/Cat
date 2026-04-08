@@ -35,7 +35,7 @@ function PhotoSlideshow({ photos, onViewAll }: { photos: Photo[]; onViewAll: () 
   const photo = photos[index]
 
   return (
-    <div className="relative rounded-3xl overflow-hidden cursor-pointer" style={{ height: 220 }} onClick={onViewAll}>
+    <div className="relative rounded-3xl overflow-hidden cursor-pointer aspect-[4/3] w-full" onClick={onViewAll}>
       <img
         key={photo.id}
         src={photo.url}
@@ -155,7 +155,7 @@ export function DashboardPage() {
       <div className="px-4 pt-6 pb-2">
         <div className="flex items-center gap-4">
           <div
-            className="w-20 h-20 rounded-full bg-[#FDDDE6] flex items-center justify-center text-4xl overflow-hidden cursor-pointer flex-shrink-0"
+            className="w-20 h-20 rounded-full bg-[var(--cp-l)] flex items-center justify-center text-4xl overflow-hidden cursor-pointer flex-shrink-0"
             onClick={() => navigate('/profile')}
           >
             {cat.avatar_url ? (
@@ -180,7 +180,7 @@ export function DashboardPage() {
                   onClick={() => useCatStore.getState().setActiveCatId(c.id)}
                   className={[
                     'flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                    active ? 'bg-[#F4A9C0] text-white' : 'bg-[#FFF5E6] text-[#4A4A4A]/70 hover:bg-[#FDDDE6]',
+                    active ? 'bg-[var(--cp)] text-white' : 'bg-[var(--cp-xl)] text-[#4A4A4A]/70 hover:bg-[var(--cp-l)]',
                   ].join(' ')}
                 >
                   {c.avatar_url
@@ -209,7 +209,7 @@ export function DashboardPage() {
                   key={type}
                   onClick={() => quickFeed(type)}
                   disabled={addFeeding.isPending}
-                  className="flex-1 py-2 rounded-2xl bg-[#FFF5E6] text-sm font-medium text-[#4A4A4A] hover:bg-[#FDDDE6] active:scale-95 transition-all"
+                  className="flex-1 py-2 rounded-2xl bg-[var(--cp-xl)] text-sm font-medium text-[#4A4A4A] hover:bg-[var(--cp-l)] active:scale-95 transition-all"
                 >
                   {labels[type]}
                 </button>
@@ -219,7 +219,7 @@ export function DashboardPage() {
           {todayFeedings.length > 0 && (
             <div className="mt-2 flex gap-1 flex-wrap">
               {todayFeedings.map((f) => (
-                <span key={f.id} className="text-xs bg-[#F4A9C0]/20 text-[#4A4A4A]/70 px-2 py-0.5 rounded-full">
+                <span key={f.id} className="text-xs bg-[var(--cp)]/20 text-[#4A4A4A]/70 px-2 py-0.5 rounded-full">
                   {format(new Date(f.fed_at), 'HH:mm')} {f.food_type === 'dry' ? '乾' : f.food_type === 'wet' ? '濕' : '零'}
                 </span>
               ))}
@@ -234,7 +234,7 @@ export function DashboardPage() {
             {latestWeight ? (
               <p className="text-2xl font-bold text-[#4A4A4A] mt-1">
                 {latestWeight.weight_kg} <span className="text-sm font-normal">kg</span>
-                {weightTrend && <span className={weightTrend === '↑' ? 'text-[#E57373]' : weightTrend === '↓' ? 'text-[#7EC8C8]' : 'text-[#4A4A4A]/40'}> {weightTrend}</span>}
+                {weightTrend && <span className={weightTrend === '↑' ? 'text-[#E57373]' : weightTrend === '↓' ? 'text-[var(--ca)]' : 'text-[#4A4A4A]/40'}> {weightTrend}</span>}
               </p>
             ) : (
               <p className="text-[#4A4A4A]/40 mt-1 text-sm">未有記錄</p>
@@ -278,7 +278,7 @@ export function DashboardPage() {
         )}
 
         {/* Tip */}
-        <Card className="bg-[#FFF5E6] border-[#FFB74D]/30">
+        <Card className="bg-[var(--cp-xl)] border-[#FFB74D]/30">
           <p className="text-xs text-[#FFB74D] font-medium mb-1">🌟 新手貼士 · 第 {daysOwned + 1} 日</p>
           <p className="text-sm text-[#4A4A4A]">{tip}</p>
         </Card>
@@ -294,7 +294,7 @@ export function DashboardPage() {
             <button
               key={item.to}
               onClick={() => navigate(item.to)}
-              className="flex flex-col items-center gap-1 py-3 rounded-2xl bg-white border border-[#F4A9C0]/20 hover:bg-[#FDDDE6]/50 active:scale-95 transition-all"
+              className="flex flex-col items-center gap-1 py-3 rounded-2xl bg-white border border-[var(--cp)]/20 hover:bg-[var(--cp-l)]/50 active:scale-95 transition-all"
             >
               <span className="text-2xl">{item.icon}</span>
               <span className="text-xs text-[#4A4A4A]/70">{item.label}</span>

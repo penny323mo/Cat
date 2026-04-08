@@ -10,7 +10,7 @@ const tabs = [
 
 export function TabBar() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-[#F4A9C0]/20"
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-[var(--cp)]/20"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex max-w-lg mx-auto">
         {tabs.map((tab) => (
@@ -21,7 +21,7 @@ export function TabBar() {
             className={({ isActive }) =>
               [
                 'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors',
-                isActive ? 'text-[#F4A9C0]' : 'text-[#4A4A4A]/40',
+                isActive ? 'text-[var(--cp)]' : 'text-[#4A4A4A]/40',
               ].join(' ')
             }
           >

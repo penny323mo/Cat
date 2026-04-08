@@ -86,7 +86,7 @@ function ActivitySummary({ feedings, weights, vets, moods }: ActivitySummaryProp
   return (
     <div className="flex flex-wrap gap-1.5 mt-2">
       {chips.map((chip, i) => (
-        <span key={i} className="inline-flex items-center gap-1 bg-[#FFF5E6] text-[#4A4A4A]/70 text-[11px] px-2.5 py-1 rounded-full">
+        <span key={i} className="inline-flex items-center gap-1 bg-[var(--cp-xl)] text-[#4A4A4A]/70 text-[11px] px-2.5 py-1 rounded-full">
           {chip.icon && <span>{chip.icon}</span>}
           {chip.label}
         </span>
@@ -134,13 +134,18 @@ export function GrowthTimelinePage() {
       })),
     ]
 
+    const usedPhotoIds = new Set<string>()
     return points.map((point, i) => {
       const from = startOfDay(new Date(point.date))
       const to = i + 1 < points.length
         ? endOfDay(new Date(points[i + 1].date))
         : new Date()
 
-      const photos = pickPhotosInRange(allPhotos, from, to, 2)
+      // Only pick photos not already shown in a previous segment
+      const available = allPhotos.filter((p) => !usedPhotoIds.has(p.id))
+      const photos = pickPhotosInRange(available, from, to, 2)
+      photos.forEach((p) => usedPhotoIds.add(p.id))
+
       const feedings = (allFeedings ?? []).filter((f) => dateInRange(f.fed_at, from, to))
       const weights = (allWeights ?? []).filter((w) => dateInRange(w.measured_at, from, to))
       const vets = (allVets ?? []).filter((v) => dateInRange(v.visit_date, from, to))
@@ -158,7 +163,7 @@ export function GrowthTimelinePage() {
         {/* Cat hero */}
         {cat && (
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-14 h-14 rounded-full bg-[#FDDDE6] overflow-hidden flex-shrink-0 flex items-center justify-center text-3xl">
+            <div className="w-14 h-14 rounded-full bg-[var(--cp-l)] overflow-hidden flex-shrink-0 flex items-center justify-center text-3xl">
               {cat.avatar_url
                 ? <img src={cat.avatar_url} alt={cat.name} className="w-full h-full object-cover" />
                 : '🐱'}
@@ -186,7 +191,7 @@ export function GrowthTimelinePage() {
         {/* Timeline */}
         <div className="relative">
           {segments.length > 0 && (
-            <div className="absolute left-4 top-4 bottom-0 w-0.5 bg-gradient-to-b from-[#F4A9C0] to-[#7EC8C8]/30" />
+            <div className="absolute left-4 top-4 bottom-0 w-0.5 bg-gradient-to-b from-[var(--cp)] to-[var(--ca)]/30" />
           )}
 
           <div className="space-y-8">
@@ -195,7 +200,7 @@ export function GrowthTimelinePage() {
                 {/* Node */}
                 <div className={[
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 z-10 border-2',
-                  i === 0 ? 'bg-[#F4A9C0] border-[#F4A9C0] text-white' : 'bg-white border-[#F4A9C0] text-[#F4A9C0]',
+                  i === 0 ? 'bg-[var(--cp)] border-[var(--cp)] text-white' : 'bg-white border-[var(--cp)] text-[var(--cp)]',
                 ].join(' ')}>
                   {i === 0 ? '🏠' : '🏆'}
                 </div>
@@ -239,10 +244,10 @@ export function GrowthTimelinePage() {
             {/* "Now" cap */}
             {segments.length > 0 && (
               <div className="flex gap-4 items-center">
-                <div className="w-8 h-8 rounded-full bg-[#7EC8C8] flex items-center justify-center text-white text-sm flex-shrink-0 z-10">
+                <div className="w-8 h-8 rounded-full bg-[var(--ca)] flex items-center justify-center text-white text-sm flex-shrink-0 z-10">
                   ✨
                 </div>
-                <p className="text-sm font-medium text-[#7EC8C8]">而家 · 繼續成長中</p>
+                <p className="text-sm font-medium text-[var(--ca)]">而家 · 繼續成長中</p>
               </div>
             )}
           </div>

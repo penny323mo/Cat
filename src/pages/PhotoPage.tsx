@@ -72,7 +72,7 @@ function UploadModal({
           <select
             value={selectedAlbum}
             onChange={(e) => setSelectedAlbum(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-2xl border border-[#F4A9C0]/30 bg-white text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#F4A9C0]"
+            className="w-full px-4 py-2.5 rounded-2xl border border-[var(--cp)]/30 bg-white text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[var(--cp)]"
           >
             <option value="">不加入相簿</option>
             {albums.map((a) => (
@@ -83,7 +83,7 @@ function UploadModal({
 
         {/* Drop zone */}
         <div
-          className="border-2 border-dashed border-[#F4A9C0]/50 rounded-2xl p-5 text-center cursor-pointer hover:bg-[#FDDDE6]/30 transition-colors"
+          className="border-2 border-dashed border-[var(--cp)]/50 rounded-2xl p-5 text-center cursor-pointer hover:bg-[var(--cp-l)]/30 transition-colors"
           onClick={() => fileRef.current?.click()}
         >
           {previews.length === 0 ? (
@@ -93,7 +93,7 @@ function UploadModal({
               <p className="text-xs text-[#4A4A4A]/30 mt-1">可一次選取多張</p>
             </>
           ) : (
-            <p className="text-sm text-[#F4A9C0] font-medium">已選 {files.length} 張 · 點擊重新選擇</p>
+            <p className="text-sm text-[var(--cp)] font-medium">已選 {files.length} 張 · 點擊重新選擇</p>
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
@@ -116,7 +116,7 @@ function UploadModal({
                   placeholder="備注（選填）"
                   value={captions[i] ?? ''}
                   onChange={(e) => updateCaption(i, e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-2xl border border-[#F4A9C0]/30 bg-white text-sm text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[#F4A9C0] placeholder:text-[#4A4A4A]/30"
+                  className="flex-1 px-3 py-2 rounded-2xl border border-[var(--cp)]/30 bg-white text-sm text-[#4A4A4A] focus:outline-none focus:ring-2 focus:ring-[var(--cp)] placeholder:text-[#4A4A4A]/30"
                 />
               </div>
             ))}
@@ -293,7 +293,7 @@ export function PhotoPage() {
                     className="cursor-pointer overflow-hidden hover:shadow-md transition-shadow"
                     onClick={() => setOpenAlbum(album)}
                   >
-                    <div className="aspect-square bg-[#FDDDE6]/50 overflow-hidden">
+                    <div className="aspect-square bg-[var(--cp-l)]/50 overflow-hidden">
                       {album.cover_url ? (
                         <img src={album.cover_url} alt={album.name} className="w-full h-full object-cover" />
                       ) : (

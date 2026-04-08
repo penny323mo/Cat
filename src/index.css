@@ -1,3 +1,11 @@
+:root {
+  --cp: #F4A9C0;
+  --cp-l: #FDDDE6;
+  --cp-xl: #FFF5E6;
+  --ca: #7EC8C8;
+  --bg: #FFFAF5;
+}
+
 @import "tailwindcss";
 
 @theme {
